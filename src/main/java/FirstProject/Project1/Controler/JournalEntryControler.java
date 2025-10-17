@@ -7,7 +7,6 @@ import FirstProject.Project1.Services.JournalEntryService;
 import FirstProject.Project1.Services.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,7 @@ public class JournalEntryControler {
     @PostMapping("/createEntry/{username}")
     public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry newEntry, @PathVariable String username) {
         try{
-            newEntry.setDate(LocalDateTime.now());
+
             journalEntryService.saveEntry(newEntry, username);
             return new ResponseEntity<>(newEntry, HttpStatus.CREATED);
         } catch(Exception err){
@@ -62,32 +61,34 @@ public class JournalEntryControler {
         }
     }
 
-    @DeleteMapping("/deleteEntry/id/{id}")
-    public ResponseEntity<?> deleteEntryById(@PathVariable ObjectId id){
+    @DeleteMapping("/deleteEntry/id/{username}/{id}")
+    public ResponseEntity<?> deleteEntryById(@PathVariable ObjectId id, @PathVariable String username){
         try{
-            journalEntryService.deleteById(id);
+            journalEntryService.deleteById(id, username);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch(Exception err){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-//    @PutMapping("/updateEntry/id/{id}")
-//    public ResponseEntity<?> updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry updatedEntry){
-//        try{
-//            JournalEntry oldJournalEntry = journalEntryService.findById(id).orElse(null);
-//            if(oldJournalEntry != null){
-//                oldJournalEntry.setTitle(updatedEntry.getTitle() != null && !updatedEntry.getTitle().equals("") ? updatedEntry.getTitle() : oldJournalEntry.getTitle());
-//                oldJournalEntry.setContent((updatedEntry.getContent()) != null && !updatedEntry.getContent().equals("") ? updatedEntry.getContent() : oldJournalEntry.getContent());
-//                journalEntryService.saveEntry(oldJournalEntry);
-//                return new ResponseEntity<>(oldJournalEntry, HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//
-//        } catch(Exception err){
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PutMapping("/updateEntry/id/{username}/{id}")
+    public ResponseEntity<?> updateEntryById(@PathVariable ObjectId id,
+                                             @PathVariable String username,
+                                             @RequestBody JournalEntry updatedEntry){
+        try{
+            JournalEntry oldJournalEntry = journalEntryService.findById(id).orElse(null);
+            if(oldJournalEntry != null){
+                oldJournalEntry.setTitle(updatedEntry.getTitle() != null && !updatedEntry.getTitle().equals("") ? updatedEntry.getTitle() : oldJournalEntry.getTitle());
+                oldJournalEntry.setContent((updatedEntry.getContent()) != null && !updatedEntry.getContent().equals("") ? updatedEntry.getContent() : oldJournalEntry.getContent());
+                journalEntryService.saveEntry(oldJournalEntry);
+                return new ResponseEntity<>(oldJournalEntry, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+        } catch(Exception err){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }
